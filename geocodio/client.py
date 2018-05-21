@@ -56,12 +56,14 @@ class GeocodioClient(object):
     """
     Client connection for Geocod.io API
     """
-    BASE_URL = "http://api.geocod.io/v1.2/{verb}"
 
-    def __init__(self, key, order='lat'):
+    def __init__(self, key, order='lat', api_version='v1.2'):
         """
         """
         self.API_KEY = key
+        self.BASE_URL = "http://api.geocod.io/{api_version}/{{verb}}".format(
+            api_version=api_version
+        )
         if order not in ('lat', 'lng'):
             raise ValueError("Order but be either `lat` or `lng`")
         self.order = order

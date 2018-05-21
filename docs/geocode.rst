@@ -115,4 +115,22 @@ preserves the list's index based lookup.
     indices in the response addresses would no longer match the indices in the
     request addresses.
 
+Using a Different API Version
+=============================
 
+By default, version 1.2 of the Geocod.io library is used. However, you can
+access a different Geocod.io API version using the api_version parameter as
+seen below::
+
+    >>> from geocodio import GeocodioClient
+    >>> client = GeocodioClient(MY_KEY, api_version='v1.3')
+
+.. note::
+
+    The api_version value should be the API version number as it should appear
+    in the URL.
+
+.. warning::
+
+    API versions newer than the default may not work if breaking changes have
+    been implemented.
