@@ -14,7 +14,18 @@ from geocodio import exceptions
 
 logger = logging.getLogger(__name__)
 
-ALLOWED_FIELDS = ['cd', 'cd113', 'cd114', 'cd115', 'cd116', 'census', 'stateleg', 'school', 'timezone']
+ALLOWED_FIELDS = [
+    'cd',
+    'cd113',
+    'cd114',
+    'cd115',
+    'cd116',
+    'census',
+    'stateleg',
+    'school',
+    'timezone',
+]
+GEOCODIO_TIMEOUT = 300
 
 
 def protect_fields(f):
@@ -22,7 +33,8 @@ def protect_fields(f):
         fields = kwargs.get('fields', [])
         for field in fields:
             if field not in ALLOWED_FIELDS:
-                raise ValueError("'{0}' is not a valid field value".format(field))
+                raise ValueError(
+                    "'{0}' is not a valid field value".format(field))
         return f(*args, **kwargs)
     return wrapper
 
@@ -38,7 +50,8 @@ def error_response(response):
     elif response.status_code == 422:
         raise exceptions.GeocodioDataError(response.json()['error'])
     else:
-        raise exceptions.GeocodioError("Unknown service error (HTTP {0})".format(response.status_code))
+        raise exceptions.GeocodioError(
+            "Unknown service error (HTTP {0})".format(response.status_code))
 
 
 def json_points(points):
@@ -58,10 +71,16 @@ class GeocodioClient(object):
     """
     BASE_URL = "http://api.geocod.io/v1.2/{verb}"
 
-    def __init__(self, key, order='lat'):
+    def __init__(self, key, order='lat', timeout=GEOCODIO_TIMEOUT):
         """
         """
         self.API_KEY = key
+
+        try:
+            self.timeout = float(timeout)
+        except ValueError:
+            raise ValueError("Timeout must be numeric.")
+
         if order not in ('lat', 'lng'):
             raise ValueError("Order but be either `lat` or `lng`")
         self.order = order
@@ -77,8 +96,13 @@ class GeocodioClient(object):
         request_params = {'api_key': self.API_KEY}
         request_headers.update(headers)
         request_params.update(params)
-        return getattr(requests, method)(url, params=request_params,
-               headers=request_headers, data=data)
+        return getattr(requests, method)(
+            url,
+            params=request_params,
+            headers=request_headers,
+            data=data,
+            timeout=self.timeout,
+        )
 
     def parse(self, address):
         """
